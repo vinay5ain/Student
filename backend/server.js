@@ -7,10 +7,15 @@ const winston = require("winston");
 
 const app = express();
 
-app.use(cors());
+// Place this line here:
+app.use(cors({
+  origin: "https://student-fwpk.onrender.com"
+}));
+
 app.use(express.json());
 app.use(express.static("public"));
 
+// ...existing code...
 mongoose
   .connect(
     process.env.MONGODB_URI || "mongodb://localhost:27017/student-management-app",
