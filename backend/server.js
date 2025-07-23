@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const morgan = require("morgan");
 const winston = require("winston");
-const path = require("path"); // ✅ Fix: Added to prevent ReferenceError
+const path = require("path"); // ✅ Required for static file handling
 
 const app = express();
 
@@ -12,9 +12,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
-app.use(morgan(":method :url :status :response-time ms - :res[content-length]"));
+app.use(
+  morgan(":method :url :status :response-time ms - :res[content-length]")
+);
 
-// Winston Logger Configuration
+// Winston Logger
 const logger = winston.createLogger({
   level: "info",
   format: winston.format.combine(
@@ -24,7 +26,7 @@ const logger = winston.createLogger({
   transports: [new winston.transports.Console()],
 });
 
-// Connect to MongoDB
+// MongoDB Connection
 mongoose
   .connect(process.env.MONGODB_URI, {
     dbName: "StudentDB",
@@ -32,7 +34,7 @@ mongoose
   .then(() => logger.info("Connected to MongoDB"))
   .catch((err) => logger.error("MongoDB connection error:", err));
 
-// Mongoose Schemas and Models
+// Schemas & Models
 const StudentSchema = new mongoose.Schema({
   name: String,
   email: String,
@@ -51,7 +53,7 @@ const TeacherSchema = new mongoose.Schema({
 const Student = mongoose.model("Student", StudentSchema);
 const Teacher = mongoose.model("Teacher", TeacherSchema);
 
-// Routes for Student CRUD
+// Student Routes
 app.post("/api/students", async (req, res) => {
   try {
     const student = new Student(req.body);
@@ -108,7 +110,7 @@ app.delete("/api/students/:id", async (req, res) => {
   }
 });
 
-// Routes for Teacher CRUD
+// Teacher Routes
 app.post("/api/teachers", async (req, res) => {
   try {
     const teacher = new Teacher(req.body);
@@ -165,14 +167,14 @@ app.delete("/api/teachers/:id", async (req, res) => {
   }
 });
 
-// ✅ Serve Frontend
+// ✅ Serve Frontend (if deployed from root/backend folder)
 app.use(express.static(path.join(__dirname, "..", "frontend")));
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "frontend", "index.html"));
 });
 
-// Start server
+// Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);
