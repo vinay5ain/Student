@@ -6,7 +6,6 @@ const morgan = require("morgan");
 const winston = require("winston");
 const path = require("path");
 
-
 const app = express();
 
 app.use(cors());
@@ -66,7 +65,7 @@ mongoose
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// Schemas
+// Schemas & Models
 const studentSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -134,14 +133,12 @@ app.put("/api/courses/:id", async (req, res) => {
 
 app.delete("/api/courses/:id", async (req, res) => {
   try {
-    const enrolledStudents = await Student.countDocuments({ course: req.params.id });
-    if (enrolledStudents > 0) {
+    const count = await Student.countDocuments({ course: req.params.id });
+    if (count > 0) {
       return res.status(400).json({ message: "Cannot delete course with enrolled students" });
     }
-
     const course = await Course.findByIdAndDelete(req.params.id);
     if (!course) return res.status(404).json({ message: "Course not found" });
-
     logger.info("Course deleted", { courseId: course._id });
     res.json({ message: "Course deleted successfully" });
   } catch (error) {
@@ -211,12 +208,12 @@ app.delete("/api/students/:id", async (req, res) => {
 
 app.get("/api/students/search", async (req, res) => {
   try {
-    const searchTerm = req.query.q;
+    const q = req.query.q || "";
     const students = await Student.find({
       $or: [
-        { name: new RegExp(searchTerm, "i") },
-        { email: new RegExp(searchTerm, "i") },
-        { course: new RegExp(searchTerm, "i") }
+        { name: new RegExp(q, "i") },
+        { email: new RegExp(q, "i") },
+        { course: new RegExp(q, "i") }
       ]
     });
     logger.info("Search completed", { count: students.length });
@@ -230,35 +227,24 @@ app.get("/api/students/search", async (req, res) => {
 // Dashboard Stats
 app.get('/api/dashboard/stats', async (req, res) => {
   try {
-    const stats = await getDashboardStats();
-    res.json(stats);
+    const totalStudents = await Student.countDocuments();
+    const activeStudents = await Student.countDocuments({ status: 'active' });
+    const totalCourses = await Course.countDocuments();
+    const activeCourses = await Course.countDocuments({ status: 'active' });
+    const graduates = await Student.countDocuments({ status: 'inactive' });
+    const courseCounts = await Student.aggregate([
+      { $group: { _id: "$course", count: { $sum: 1 } } }
+    ]);
+    res.json({
+      totalStudents, activeStudents, totalCourses, activeCourses,
+      graduates, courseCounts,
+      successRate: totalStudents > 0 ? Math.round((graduates / totalStudents)*100) : 0
+    });
   } catch (error) {
     logger.error("Dashboard stats error:", error);
     res.status(500).json({ message: error.message });
   }
 });
-
-async function getDashboardStats() {
-  const totalStudents = await Student.countDocuments();
-  const activeStudents = await Student.countDocuments({ status: 'active' });
-  const totalCourses = await Course.countDocuments();
-  const activeCourses = await Course.countDocuments({ status: 'active' });
-  const graduates = await Student.countDocuments({ status: 'inactive' });
-
-  const courseCounts = await Student.aggregate([
-    { $group: { _id: "$course", count: { $sum: 1 } } }
-  ]);
-
-  return {
-    totalStudents,
-    activeStudents,
-    totalCourses,
-    activeCourses,
-    graduates,
-    courseCounts,
-    successRate: totalStudents > 0 ? Math.round((graduates / totalStudents) * 100) : 0
-  };
-}
 
 // Health Check
 app.get('/health', (req, res) => {
@@ -273,39 +259,35 @@ app.get('/health', (req, res) => {
 app.get('/health/detailed', async (req, res) => {
   try {
     const dbStatus = mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected';
-    const systemInfo = {
-      memory: {
-        total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
-        used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
-        unit: 'MB'
-      },
-      uptime: {
-        seconds: Math.round(process.uptime()),
-        formatted: formatUptime(process.uptime())
-      },
-      nodeVersion: process.version,
-      platform: process.platform
+    const memory = {
+      total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
+      used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+      unit: 'MB'
     };
-
+    const uptimeSec = Math.round(process.uptime());
+    const formatUptime = secs => {
+      const d = Math.floor(secs/(3600*24));
+      const h = Math.floor((secs%(3600*24))/3600);
+      const m = Math.floor((secs%3600)/60);
+      const s = secs%60;
+      return `${d}d ${h}h ${m}m ${s}s`;
+    };
     res.status(200).json({
       status: 'UP',
       timestamp: new Date(),
       database: { status: dbStatus },
-      system: systemInfo,
+      system: {
+        memory,
+        uptime: { seconds: uptimeSec, formatted: formatUptime(uptimeSec) },
+        nodeVersion: process.version,
+        platform: process.platform
+      },
       environment: process.env.NODE_ENV || 'development'
     });
-  } catch (error) {
-    res.status(500).json({ status: 'DOWN', error: error.message });
+  } catch (err) {
+    res.status(500).json({ status: 'DOWN', error: err.message });
   }
 });
-
-function formatUptime(seconds) {
-  const d = Math.floor(seconds / (3600 * 24));
-  const h = Math.floor((seconds % (3600 * 24)) / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.floor(seconds % 60);
-  return `${d}d ${h}h ${m}m ${s}s`;
-}
 
 // Global Error Handler
 app.use((err, req, res, next) => {
@@ -319,9 +301,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Internal server error" });
 });
 
-// ✅ Serve Frontend (HTML/CSS/JS)
+// ✅ Serve frontend
 app.use(express.static(path.join(__dirname, "..", "frontend")));
-
 app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, "..", "frontend", "index.html"));
 });
