@@ -16,11 +16,10 @@ app.use(cors({
 app.use(express.json());
 
 // Serve static files from 'public' folder
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "public")));
 
-// Serve index.html for root route
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 // ...API routes below...
