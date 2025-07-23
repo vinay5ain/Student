@@ -459,10 +459,10 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // SPA catch-all route (should be last)
 // DO NOT use "*" or "*/*" here!
-app.get("/*", (req, res) => {
+
+app.get(['/', '/home', '/dashboard', '/students*', '/courses*'], (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
-
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
