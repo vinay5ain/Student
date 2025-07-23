@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Management Dashboard</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      :root {
+        --primary-color: #2563eb;
+        --secondary-color: #1e40af;
+        --background-color: #f1f5f9;
+        --text-color: #1e293b;
+        --sidebar-width: 250px;
+      }
+
+      body {
+        background-color: var(--background-color);
+      }
+
+      .container {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* Sidebar Styles */
+      .sidebar {
+        width: var(--sidebar-width);
+        background-color: white;
+        padding: 20px;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        position: fixed;
+        height: 100vh;
+      }
+
+      .logo {
+        font-size: 24px;
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-bottom: 40px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .nav-item {
+        padding: 12px 15px;
+        margin: 5px 0;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--text-color);
+        transition: all 0.3s ease;
+      }
+
+      .nav-item:hover {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .nav-item.active {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      /* Main Content Styles */
+      .main-content {
+        margin-left: var(--sidebar-width);
+        flex: 1;
+        padding: 20px;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .search-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background-color: var(--background-color);
+        padding: 10px 15px;
+        border-radius: 8px;
+        width: 300px;
+      }
+
+      .search-bar input {
+        border: none;
+        background: none;
+        outline: none;
+        width: 100%;
+      }
+
+      .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+      }
+
+      /* Dashboard Cards */
+      .dashboard-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .card {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .card-icon {
+        width: 40px;
+        height: 40px;
+        background-color: var(--primary-color);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+      }
+
+      .card-title {
+        font-size: 14px;
+        color: #64748b;
+      }
+
+      .card-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: var(--text-color);
+      }
+
+      /* Student List Table */
+      .student-list {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .add-student-btn {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background-color 0.3s ease;
+      }
+
+      .add-student-btn:hover {
+        background-color: var(--secondary-color);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      th {
+        background-color: #f8fafc;
+        color: #64748b;
+        font-weight: 600;
+      }
+
+      tr:hover {
+        background-color: #f8fafc;
+      }
+
+      .status-badge {
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      .status-active {
+        background-color: #dcfce7;
+        color: #166534;
+      }
+
+      .status-inactive {
+        background-color: #fee2e2;
+        color: #991b1b;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 8px;
+      }
+
+      .action-btn {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .edit-btn {
+        background-color: #dbeafe;
+        color: var(--primary-color);
+      }
+
+      .delete-btn {
+        background-color: #fee2e2;
+        color: #dc2626;
+      }
+
+      /* Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal-content {
+        background-color: white;
+        padding: 30px;
+        border-radius: 10px;
+        width: 500px;
+        max-width: 90%;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: #64748b;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--text-color);
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #e2e8f0;
+        border-radius: 5px;
+        outline: none;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        border-color: var(--primary-color);
+      }
+
+      .submit-btn {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 20px;
+      }
+
+      .submit-btn:hover {
+        background-color: var(--secondary-color);
+      }
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 25px;
+        color: white;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        opacity: 1;
+        transition: opacity 0.5s ease;
+      }
+
+      .notification.success {
+        background-color: #4caf50;
+      }
+      .notification.error {
+        background-color: #f44336;
+      }
+      .notification.warning {
+        background-color: #ff9800;
+      }
+      .notification.info {
+        background-color: #2196f3;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #64748b;
+      }
+
+      .empty-state i {
+        font-size: 48px;
+        margin-bottom: 20px;
+        color: #94a3b8;
+      }
+
+      .empty-state h3 {
+        margin-bottom: 10px;
+        color: #1e293b;
+      }
+
+      .course-list,
+      .student-list {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+      }
+
+      .section {
+        display: none;
+      }
+
+      .section.active {
+        display: block;
+      }
+
+      .dashboard.active {
+        display: grid;
+      }
+
+      textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #e2e8f0;
+        border-radius: 5px;
+        resize: vertical;
+        min-height: 100px;
+        font-family: inherit;
+      }
+
+      textarea:focus {
+        border-color: var(--primary-color);
+        outline: none;
+      }
+
+      .loading-spinner {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .loading-spinner.active {
+        display: flex;
+      }
+
+      .spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!--Sidebar--->
+      <div class="sidebar">
+        <div class="logo">
+          <i class="fas fa-graduation-cap"></i>
+          EduManager
+        </div>
+
+        <div class="nav-item active" data-section="dashboard">
+          <i class="fas fa-chart-pie"></i>
+          Dashboard
+        </div>
+        <div class="nav-item" data-section="students">
+          <i class="fas fa-users"></i>
+          Students
+        </div>
+        <div class="nav-item" data-section="courses">
+          <i class="fas fa-book"></i>
+          Courses
+        </div>
+        <div class="nav-item" data-section="reports">
+          <i class="fas fa-chart-bar"></i>
+          Reports
+        </div>
+        <div class="nav-item" data-section="settings">
+          <i class="fas fa-cog"></i>
+          Settings
+        </div>
+      </div>
+
+      <!--Main Content-->
+      <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+          <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search students..." />
+          </div>
+          <div class="user-profile">
+            <div class="user-avatar">
+              <i class="fas fa-user"></i>
+            </div>
+            <span>Admin</span>
+          </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="section dashboard active">
+          <div class="dashboard-cards">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon">
+                  <i class="fas fa-users"></i>
+                </div>
+              </div>
+              <div class="card-title">Total Students</div>
+              <div class="card-value">0</div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon">
+                  <i class="fas fa-book"></i>
+                </div>
+              </div>
+              <div class="card-title">Active Courses</div>
+              <div class="card-value">0</div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon">
+                  <i class="fas fa-graduation-cap"></i>
+                </div>
+              </div>
+              <div class="card-title">Graduates</div>
+              <div class="card-value">0</div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+              </div>
+              <div class="card-title">Success Rate</div>
+              <div class="card-value">0%</div>
+            </div>
+          </div>
+
+          <!---Student List in Dashboard-->
+          <div class="student-list">
+            <div class="table-header">
+              <h2>Recent Students</h2>
+              <button class="add-student-btn" onclick="openModal()">
+                <i class="fas fa-plus"></i>
+                Add Student
+              </button>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Course</th>
+                  <th>Enrollment Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="studentTableBody">
+                <!-- Will be populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Students Section -->
+        <div id="studentsSection" class="section">
+          <div class="student-list">
+            <div class="table-header">
+              <h2>All Students</h2>
+              <button class="add-student-btn" onclick="openModal()">
+                <i class="fas fa-plus"></i>
+                Add Student
+              </button>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Course</th>
+                  <th>Enrollment Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="allStudentsTableBody">
+                <!-- Will be populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Courses Section -->
+        <div id="coursesSection" class="section">
+          <div class="course-list">
+            <div class="table-header">
+              <h2>Course Management</h2>
+              <button class="add-student-btn" onclick="openCourseModal()">
+                <i class="fas fa-plus"></i>
+                Add Course
+              </button>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Duration (months)</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="courseTableBody">
+                <!-- Will be populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Reports Section -->
+        <div id="reportsSection" class="section">
+          <h2>Reports Coming Soon</h2>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settingsSection" class="section">
+          <h2>Settings Coming Soon</h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student Modal -->
+    <div class="modal" id="studentModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="modalTitle">Add New Student</h2>
+          <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <form id="studentForm">
+          <div class="form-group">
+            <label for="studentName">Full Name</label>
+            <input type="text" id="studentName" required />
+          </div>
+          <div class="form-group">
+            <label for="studentEmail">Email</label>
+            <input type="email" id="studentEmail" required />
+          </div>
+          <div class="form-group">
+            <label for="studentCourse">Course</label>
+            <select id="studentCourse" required>
+              <option value="">Select Course</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="enrollmentDate">Enrollment Date</label>
+            <input type="date" id="enrollmentDate" required />
+          </div>
+          <button type="submit" class="submit-btn">Save Student</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteConfirmationModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Confirm Deletion</h2>
+          <button class="close-btn" onclick="closeDeleteModal()">
+            &times;
+          </button>
+        </div>
+        <div style="margin: 20px 0">
+          <p>
+            Are you sure you want to delete this item? This action cannot be
+            undone.
+          </p>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: flex-end">
+          <button
+            class="action-btn"
+            onclick="closeDeleteModal()"
+            style="padding: 8px 16px"
+          >
+            Cancel
+          </button>
+          <button
+            class="action-btn delete-btn"
+            onclick="confirmDelete()"
+            style="padding: 8px 16px"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Course Modal -->
+    <div class="modal" id="courseModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="courseModalTitle">Add New Course</h2>
+          <button class="close-btn" onclick="closeCourseModal()">
+            &times;
+          </button>
+        </div>
+        <form id="courseForm">
+          <div class="form-group">
+            <label for="courseName">Course Name</label>
+            <input type="text" id="courseName" required />
+          </div>
+          <div class="form-group">
+            <label for="courseDescription">Description</label>
+            <textarea id="courseDescription" required rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="courseDuration">Duration (months)</label>
+            <input type="number" id="courseDuration" required min="1" />
+          </div>
+          <div class="form-group">
+            <label for="courseStatus">Status</label>
+            <select id="courseStatus" required>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <button type="submit" class="submit-btn">Save Course</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+    </div>
+
+    <script>
+      const API_BASE_URL = "http://localhost:3000";
+      let students = [];
+      let courses = [];
+      let currentSection = "dashboard";
+      let editingId = null;
+      let editingCourseId = null;
+      let deleteType = ""; // 'student' or 'course'
+      let deleteId = null;
+
+      const studentTableBody = document.getElementById("studentTableBody");
+      const allStudentsTableBody = document.getElementById(
+        "allStudentsTableBody"
+      );
+      const courseTableBody = document.getElementById("courseTableBody");
+      const studentModal = document.getElementById("studentModal");
+      const courseModal = document.getElementById("courseModal");
+      const studentForm = document.getElementById("studentForm");
+      const courseForm = document.getElementById("courseForm");
+      const searchInput = document.querySelector(".search-bar input");
+      const loadingSpinner = document.querySelector(".loading-spinner");
+
+      // Initialize the dashboard
+      document.addEventListener("DOMContentLoaded", async () => {
+        initializeEventListeners();
+        await checkAndLoadData();
+      });
+
+      // Initialize all event listeners
+      function initializeEventListeners() {
+        // Form submissions
+        studentForm.addEventListener("submit", handleFormSubmit);
+        courseForm.addEventListener("submit", handleCourseFormSubmit);
+
+        // Search functionality
+        searchInput.addEventListener("input", handleSearch);
+
+        // Navigation
+        document.querySelectorAll(".nav-item").forEach((item) => {
+          item.addEventListener("click", () => {
+            const section = item.dataset.section;
+            navigateToSection(section);
+          });
+        });
+
+        // Modal outside click handlers
+        window.onclick = (event) => {
+          if (event.target === studentModal) closeModal();
+          if (event.target === courseModal) closeCourseModal();
+        };
+      }
+
+      // Initial data load and checks
+      async function checkAndLoadData() {
+        showLoading();
+        try {
+          await loadCourses();
+
+          // Check if we have any courses
+          if (courses.length === 0) {
+            showNotification(
+              "Please add courses before managing students",
+              "warning"
+            );
+            navigateToSection("courses");
+            openCourseModal();
+            return;
+          }
+
+          await Promise.all([loadStudents(), updateDashboardStats()]);
+        } catch (error) {
+          console.error("Error during initialization:", error);
+          showNotification("Error initializing application", "error");
+        } finally {
+          hideLoading();
+        }
+      }
+
+      // Navigation functions
+      function navigateToSection(section) {
+        currentSection = section;
+
+        // Update active nav item
+        document.querySelectorAll(".nav-item").forEach((item) => {
+          item.classList.remove("active");
+          if (item.dataset.section === section) {
+            item.classList.add("active");
+          }
+        });
+
+        // Hide all sections
+        document.querySelectorAll(".section").forEach((section) => {
+          section.classList.remove("active");
+        });
+
+        // Show selected section
+        document.getElementById(`${section}Section`).classList.add("active");
+
+        // Refresh data when switching sections
+        if (section === "courses") {
+          loadCourses();
+        } else if (section === "students" || section === "dashboard") {
+          loadStudents();
+          updateDashboardStats();
+        }
+      }
+
+      // API Functions
+      async function updateDashboardStats() {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/dashboard/stats`);
+          if (!response.ok) throw new Error("Failed to fetch dashboard stats");
+
+          const stats = await response.json();
+
+          // Update dashboard cards
+          document.querySelector(".card:nth-child(1) .card-value").textContent =
+            stats.totalStudents.toLocaleString();
+          document.querySelector(".card:nth-child(2) .card-value").textContent =
+            stats.activeCourses.toLocaleString();
+          document.querySelector(".card:nth-child(3) .card-value").textContent =
+            stats.graduates.toLocaleString();
+          document.querySelector(
+            ".card:nth-child(4) .card-value"
+          ).textContent = `${stats.successRate}%`;
+        } catch (error) {
+          console.error("Error updating dashboard stats:", error);
+          showNotification("Error updating statistics", "error");
+        }
+      }
+
+      async function loadStudents() {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/students`);
+          if (!response.ok) throw new Error("Failed to fetch students");
+
+          students = await response.json();
+          renderStudentTables(students);
+        } catch (error) {
+          console.error("Error loading students:", error);
+          showNotification("Error loading students", "error");
+          students = [];
+          renderStudentTables([]);
+        }
+      }
+
+      async function loadCourses() {
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/courses`);
+          if (!response.ok) throw new Error("Failed to fetch courses");
+
+          courses = await response.json();
+          updateCourseDropdown(courses);
+          renderCourseTable(courses);
+          return courses;
+        } catch (error) {
+          console.error("Error loading courses:", error);
+          showNotification("Error loading courses", "error");
+          courses = [];
+          renderCourseTable([]);
+        }
+      }
+
+      // CRUD Operations for Students
+      async function createStudent(studentData) {
+        const response = await fetch(`${API_BASE_URL}/api/students`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(studentData),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || "Failed to create student");
+        }
+
+        return response.json();
+      }
+
+      async function updateStudent(id, studentData) {
+        const response = await fetch(`${API_BASE_URL}/api/students/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(studentData),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || "Failed to update student");
+        }
+
+        return response.json();
+      }
+
+      async function deleteStudent(id) {
+        deleteType = "student";
+        deleteId = id;
+        document.getElementById("deleteConfirmationModal").style.display =
+          "flex";
+      }
+
+      // CRUD Operations for Courses
+      async function createCourse(courseData) {
+        const response = await fetch(`${API_BASE_URL}/api/courses`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(courseData),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || "Failed to create course");
+        }
+
+        return response.json();
+      }
+
+      async function updateCourse(id, courseData) {
+        const response = await fetch(`${API_BASE_URL}/api/courses/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(courseData),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || "Failed to update course");
+        }
+
+        return response.json();
+      }
+
+      async function deleteCourse(id) {
+        deleteType = "course";
+        deleteId = id;
+        document.getElementById("deleteConfirmationModal").style.display =
+          "flex";
+      }
+
+      function closeDeleteModal() {
+        document.getElementById("deleteConfirmationModal").style.display =
+          "none";
+        deleteType = "";
+        deleteId = null;
+      }
+
+      async function confirmDelete() {
+        showLoading();
+        try {
+          if (deleteType === "student") {
+            const response = await fetch(
+              `${API_BASE_URL}/api/students/${deleteId}`,
+              {
+                method: "DELETE",
+              }
+            );
+
+            if (!response.ok) {
+              throw new Error("Failed to delete student");
+            }
+
+            showNotification("Student deleted successfully", "success");
+            await loadStudents();
+            await updateDashboardStats();
+          } else if (deleteType === "course") {
+            const response = await fetch(
+              `${API_BASE_URL}/api/courses/${deleteId}`,
+              {
+                method: "DELETE",
+              }
+            );
+
+            if (!response.ok) {
+              const error = await response.json();
+              throw new Error(error.message || "Failed to delete course");
+            }
+
+            showNotification("Course deleted successfully", "success");
+            await loadCourses();
+            await updateDashboardStats();
+          }
+        } catch (error) {
+          console.error("Error during deletion:", error);
+          showNotification(error.message || "Error during deletion", "error");
+        } finally {
+          hideLoading();
+          closeDeleteModal();
+        }
+      }
+
+      // Form Handling
+      async function handleFormSubmit(e) {
+        e.preventDefault();
+        showLoading();
+
+        const studentData = {
+          name: document.getElementById("studentName").value.trim(),
+          email: document.getElementById("studentEmail").value.trim(),
+          course: document.getElementById("studentCourse").value,
+          enrollmentDate: document.getElementById("enrollmentDate").value,
+          status: "active",
+        };
+
+        try {
+          if (editingId) {
+            await updateStudent(editingId, studentData);
+            showNotification("Student updated successfully", "success");
+          } else {
+            await createStudent(studentData);
+            showNotification("Student created successfully", "success");
+          }
+          closeModal();
+          await loadStudents();
+          await updateDashboardStats();
+        } catch (error) {
+          console.error("Error:", error);
+          showNotification("Error saving student data", "error");
+        } finally {
+          hideLoading();
+        }
+      }
+
+      async function handleCourseFormSubmit(e) {
+        e.preventDefault();
+        showLoading();
+
+        const courseData = {
+          name: document.getElementById("courseName").value.trim(),
+          description: document
+            .getElementById("courseDescription")
+            .value.trim(),
+          duration: parseInt(document.getElementById("courseDuration").value),
+          status: document.getElementById("courseStatus").value,
+        };
+
+        try {
+          if (editingCourseId) {
+            await updateCourse(editingCourseId, courseData);
+            showNotification("Course updated successfully", "success");
+          } else {
+            await createCourse(courseData);
+            showNotification("Course created successfully", "success");
+          }
+          closeCourseModal();
+          await loadCourses();
+          await updateDashboardStats();
+        } catch (error) {
+          console.error("Error:", error);
+          showNotification("Error saving course data", "error");
+        } finally {
+          hideLoading();
+        }
+      }
+
+      // UI Rendering Functions
+      function renderStudentTables(studentsToRender) {
+        const tables = [studentTableBody, allStudentsTableBody];
+
+        tables.forEach((table) => {
+          if (!table) return; // Skip if table doesn't exist
+
+          table.innerHTML = "";
+
+          if (studentsToRender.length === 0) {
+            const colSpan = table
+              .closest("table")
+              .querySelectorAll("th").length;
+            table.innerHTML = `
+                <tr>
+                    <td colspan="${colSpan}" class="empty-state">
+                        <i class="fas fa-users"></i>
+                        <h3>No Students Found</h3>
+                        <p>Click "Add Student" to add your first student</p>
+                    </td>
+                </tr>
+            `;
+            return;
+          }
+
+          studentsToRender.forEach((student) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${student._id}</td>
+                <td>${escapeHtml(student.name)}</td>
+                <td>${escapeHtml(student.courseName || student.course)}</td>
+                <td>${formatDate(student.enrollmentDate)}</td>
+                <td>
+                    <span class="status-badge status-${student.status}">
+                        ${capitalizeFirstLetter(student.status)}
+                    </span>
+                </td>
+                <td class="action-buttons">
+                    <button class="action-btn edit-btn" onclick="editStudent('${
+                      student._id
+                    }')">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="action-btn delete-btn" onclick="deleteStudent('${
+                      student._id
+                    }')">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </td>
+            `;
+            table.appendChild(row);
+          });
+        });
+      }
+
+      function updateCourseDropdown(courses) {
+        const courseSelect = document.getElementById("studentCourse");
+        courseSelect.innerHTML = '<option value="">Select Course</option>';
+
+        courses
+          .filter((course) => course.status === "active")
+          .forEach((course) => {
+            const option = document.createElement("option");
+            option.value = course._id;
+            option.textContent = course.name;
+            courseSelect.appendChild(option);
+          });
+      }
+
+      function renderCourseTable(coursesToRender) {
+        courseTableBody.innerHTML = "";
+
+        if (coursesToRender.length === 0) {
+          courseTableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="empty-state">
+                    <i class="fas fa-book"></i>
+                    <h3>No Courses Found</h3>
+                    <p>Click "Add Course" to add your first course</p>
+                </td>
+            </tr>
+        `;
+          return;
+        }
+
+        coursesToRender.forEach((course) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${course._id}</td>
+            <td>${escapeHtml(course.name)}</td>
+            <td>${escapeHtml(course.description)}</td>
+            <td>${course.duration}</td>
+            <td>
+                <span class="status-badge status-${course.status}">
+                    ${capitalizeFirstLetter(course.status)}
+                </span>
+            </td>
+            <td class="action-buttons">
+                <button class="action-btn edit-btn" onclick="editCourse('${
+                  course._id
+                }')">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="action-btn delete-btn" onclick="deleteCourse('${
+                  course._id
+                }')">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </td>
+        `;
+          courseTableBody.appendChild(row);
+        });
+      }
+
+      // Modal Operations
+      function openModal() {
+        if (courses.length === 0) {
+          showNotification(
+            "Please add at least one course before adding students",
+            "warning"
+          );
+          navigateToSection("courses");
+          openCourseModal();
+          return;
+        }
+
+        studentModal.style.display = "flex";
+        editingId = null;
+        studentForm.reset();
+        document.getElementById("modalTitle").textContent = "Add New Student";
+      }
+
+      function closeModal() {
+        studentModal.style.display = "none";
+        editingId = null;
+        studentForm.reset();
+      }
+
+      function openCourseModal() {
+        courseModal.style.display = "flex";
+        editingCourseId = null;
+        courseForm.reset();
+        document.getElementById("courseModalTitle").textContent =
+          "Add New Course";
+      }
+
+      function closeCourseModal() {
+        courseModal.style.display = "none";
+        editingCourseId = null;
+        courseForm.reset();
+      }
+
+      // Update the editStudent function
+      async function editStudent(id) {
+        showLoading();
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/students/${id}`);
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || "Failed to fetch student");
+          }
+
+          const student = await response.json();
+
+          editingId = id;
+          document.getElementById("modalTitle").textContent = "Edit Student";
+          document.getElementById("studentName").value = student.name;
+          document.getElementById("studentEmail").value = student.email;
+          document.getElementById("studentCourse").value = student.course;
+          document.getElementById("enrollmentDate").value = formatDateForInput(
+            student.enrollmentDate
+          );
+
+          studentModal.style.display = "flex";
+        } catch (error) {
+          console.error("Error loading student for edit:", error);
+          showNotification(
+            error.message || "Error loading student data",
+            "error"
+          );
+        } finally {
+          hideLoading();
+        }
+      }
+
+      // Update the editCourse function
+      async function editCourse(id) {
+        showLoading();
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/courses/${id}`);
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || "Failed to fetch course");
+          }
+
+          const course = await response.json();
+
+          editingCourseId = id;
+          document.getElementById("courseModalTitle").textContent =
+            "Edit Course";
+          document.getElementById("courseName").value = course.name;
+          document.getElementById("courseDescription").value =
+            course.description;
+          document.getElementById("courseDuration").value = course.duration;
+          document.getElementById("courseStatus").value = course.status;
+
+          courseModal.style.display = "flex";
+        } catch (error) {
+          console.error("Error loading course for edit:", error);
+          showNotification(
+            error.message || "Error loading course data",
+            "error"
+          );
+        } finally {
+          hideLoading();
+        }
+      }
+
+      // Search Functionality
+      let searchTimeout;
+      function handleSearch(e) {
+        clearTimeout(searchTimeout);
+        const searchTerm = e.target.value.trim();
+
+        searchTimeout = setTimeout(async () => {
+          if (searchTerm.length === 0) {
+            await loadStudents();
+            return;
+          }
+
+          showLoading();
+          try {
+            const response = await fetch(
+              `${API_BASE_URL}/api/students/search?q=${encodeURIComponent(
+                searchTerm
+              )}`
+            );
+            if (!response.ok) throw new Error("Search failed");
+
+            const filteredStudents = await response.json();
+            renderStudentTables(filteredStudents);
+          } catch (error) {
+            console.error("Error searching students:", error);
+            showNotification("Error searching students", "error");
+          } finally {
+            hideLoading();
+          }
+        }, 300); // Debounce search requests
+      }
+
+      // Utility Functions
+      function formatDate(dateString) {
+        const options = { year: "numeric", month: "short", day: "numeric" };
+        return new Date(dateString).toLocaleDateString(undefined, options);
+      }
+
+      function formatDateForInput(dateString) {
+        return new Date(dateString).toISOString().split("T")[0];
+      }
+
+      function capitalizeFirstLetter(string) {
+        if (!string) return "";
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      }
+
+      function escapeHtml(unsafe) {
+        if (!unsafe) return "";
+        return unsafe
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      // Loading Spinner Functions
+      function showLoading() {
+        document.querySelector(".loading-spinner").classList.add("active");
+      }
+
+      function hideLoading() {
+        document.querySelector(".loading-spinner").classList.remove("active");
+      }
+
+      // Notification System
+      function showNotification(message, type = "info") {
+        // Remove any existing notifications
+        const existingNotifications =
+          document.querySelectorAll(".notification");
+        existingNotifications.forEach((notification) => notification.remove());
+
+        // Create new notification
+        const notification = document.createElement("div");
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+
+        // Add notification to the document
+        document.body.appendChild(notification);
+
+        // Remove notification after delay
+        setTimeout(() => {
+          notification.style.opacity = "0";
+          setTimeout(() => notification.remove(), 500);
+        }, 3000);
+      }
+
+      // Error Handler
+      function handleError(error, defaultMessage = "An error occurred") {
+        console.error(error);
+        showNotification(error.message || defaultMessage, "error");
+      }
+
+      // Update modal close handlers
+      window.onclick = (event) => {
+        if (event.target === studentModal) closeModal();
+        if (event.target === courseModal) closeCourseModal();
+        if (event.target === document.getElementById("deleteConfirmationModal"))
+          closeDeleteModal();
+      };
+    </script>
+  </body>
+</html>
