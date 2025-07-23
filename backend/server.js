@@ -454,13 +454,18 @@ function formatUptime(seconds) {
   return parts.join(' ');
 }
 
+// 1. Serve static files from public directory
+app.use(express.static(path.join(__dirname, "../public")));
 
-// DO NOT use "*" or "*/*" here!
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+// 2. Serve index.html for the root route
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
+// 3. Optional: Fallback 404 handler for unmatched routes
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, "../public/404.html")); // or use res.send("Not found")
+});
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
