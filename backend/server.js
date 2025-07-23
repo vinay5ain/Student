@@ -20,7 +20,7 @@ app.use(express.static("public"));
 
 // Serve index.html for root route
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/frontend/index.html');
+  res.sendFile(__dirname + '/public/index.html');
 });
 
 // ...API routes below...
