@@ -454,15 +454,13 @@ function formatUptime(seconds) {
   return parts.join(' ');
 }
 
-// Serve static files from 'public' folder
-app.use(express.static(path.join(__dirname, "public")));
 
-// SPA catch-all route (should be last)
 // DO NOT use "*" or "*/*" here!
 
-app.get(['/', '/home', '/dashboard', '/students*', '/courses*'], (req, res) => {
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
