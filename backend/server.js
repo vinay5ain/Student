@@ -7,14 +7,23 @@ const winston = require("winston");
 
 const app = express();
 
-// Place this line here:
+// CORS setup
 app.use(cors({
   origin: "https://student-fwpk.onrender.com"
 }));
 
+// Parse JSON
 app.use(express.json());
+
+// Serve static files from 'public' folder
 app.use(express.static("public"));
 
+// Serve index.html for root route
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/public/index.html');
+});
+
+// ...API routes below...
 // ...existing code...
 mongoose
   .connect(
@@ -453,6 +462,9 @@ function formatUptime(seconds) {
     return parts.join(' ');
 }
 
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/public/index.html');
+});
 
 const PORT = process.env.PORT || 3000;
 
